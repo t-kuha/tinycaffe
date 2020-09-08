@@ -2,16 +2,11 @@
 
 option(USE_CUDA "Use CUDA support" ON)
 option(USE_CUDNN "Use CUDNN support" ON)
-option(USE_JAVA "Use JAVA support" OFF)
 
 # select BLAS
 set(BLAS "openblas" CACHE STRING "Selected BLAS library")
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/Cuda.cmake)
-
-if(USE_JAVA)
-  find_package(JNI)
-endif()
 
 # turn on C++11
 if(CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
@@ -93,24 +88,6 @@ if(HAVE_CUDA)
   endif()
   caffe_cuda_compile(CAFFE_CUDA_OBJS ${CAFFE_CUDA_CODE})
   list(APPEND CAFFE_COMPILE_CODE ${CAFFE_CUDA_OBJS})
-endif()
-
-# java support
-if(JNI_FOUND)
-  message(STATUS "We have JAVA support")
-  file(GLOB CAFFE_SRC_JNI ${CMAKE_CURRENT_LIST_DIR}/src/jni/*.h
-                          ${CMAKE_CURRENT_LIST_DIR}/src/jni/*.c)
-  list(APPEND CAFFE_COMPILE_CODE ${CAFFE_SRC_JNI})
-  include_directories(${JNI_INCLUDE_DIRS})
-  list(APPEND Caffe_LINKER_LIBS ${JNI_LIBRARIES})
-endif()
-
-# android jni
-if(ANDROID)
-  message(STATUS "We have JAVA support")
-  file(GLOB CAFFE_SRC_JNI ${CMAKE_CURRENT_LIST_DIR}/src/jni/*.h
-                          ${CMAKE_CURRENT_LIST_DIR}/src/jni/*.c)
-  list(APPEND CAFFE_COMPILE_CODE ${CAFFE_SRC_JNI})
 endif()
 
 # file structure
