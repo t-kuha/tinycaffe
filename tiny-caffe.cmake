@@ -1,12 +1,7 @@
 # mini-caffe.cmake
 
-option(USE_CUDA "Use CUDA support" ON)
-option(USE_CUDNN "Use CUDNN support" ON)
-
 # select BLAS
 set(BLAS "openblas" CACHE STRING "Selected BLAS library")
-
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/Cuda.cmake)
 
 # turn on C++11
 if(CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
@@ -48,51 +43,16 @@ else(MSVC)
 endif(MSVC)
 
 # source file structure
-if(HAVE_CUDA)
-	file(GLOB CAFFE_SRC ${CMAKE_CURRENT_LIST_DIR}/src/*.hpp
-						${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
-						${CMAKE_CURRENT_LIST_DIR}/src/caffe.pb.h
-						${CMAKE_CURRENT_LIST_DIR}/src/caffe.pb.cc
-						${CMAKE_CURRENT_LIST_DIR}/src/*.cuh)
-else()
-	file(GLOB CAFFE_SRC ${CMAKE_CURRENT_LIST_DIR}/src/*.hpp
-						${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
-						${CMAKE_CURRENT_LIST_DIR}/src/caffe.pb.h
-						${CMAKE_CURRENT_LIST_DIR}/src/caffe.pb.cc)
-endif()
+file(GLOB CAFFE_SRC ${CMAKE_CURRENT_LIST_DIR}/src/*.hpp
+	${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
+	${CMAKE_CURRENT_LIST_DIR}/src/caffe.pb.h
+	${CMAKE_CURRENT_LIST_DIR}/src/caffe.pb.cc)
+
 # cpp code
 set(CAFFE_COMPILE_CODE ${CAFFE_SRC})
 
-# cuda support
-if(HAVE_CUDA)
-  message(STATUS "We have CUDA support")
-  # cuda code
-  file(GLOB CAFFE_SRC_ALL_CU ${CMAKE_CURRENT_LIST_DIR}/src/*.cu)
-  set(CAFFE_CUDA_CODE ${CAFFE_SRC_ALL_CU})
-  # cudnn support
-  if(HAVE_CUDNN)
-    message(STATUS "We have CUDNN support")
-    # source file structure
-    file(GLOB CAFFE_SRC_LAYERS_CUDNN ${CMAKE_CURRENT_LIST_DIR}/src/cudnn/*.hpp
-                                     ${CMAKE_CURRENT_LIST_DIR}/src/cudnn/*.cpp
-                                     ${CMAKE_CURRENT_LIST_DIR}/src/cudnn/*.cu)
-    # cuda code
-    file(GLOB CAFFE_CUDNN_CUDA_CODE ${CMAKE_CURRENT_LIST_DIR}/src/cudnn/*.cu)
-    list(APPEND CAFFE_CUDA_CODE ${CAFFE_CUDNN_CUDA_CODE})
-    # cpp code
-    file(GLOB CAFFR_CUDNN_CPP_CODE ${CMAKE_CURRENT_LIST_DIR}/src/cudnn/*.hpp
-                                   ${CMAKE_CURRENT_LIST_DIR}/src/cudnn/*.cpp)
-    list(APPEND CAFFE_COMPILE_CODE ${CAFFR_CUDNN_CPP_CODE})
-    set(CAFFE_SRC_LAYERS_CUDNN ${CAFFR_CUDNN_CPP_CODE}
-                               ${CAFFE_CUDNN_CUDA_CODE})
-  endif()
-  caffe_cuda_compile(CAFFE_CUDA_OBJS ${CAFFE_CUDA_CODE})
-  list(APPEND CAFFE_COMPILE_CODE ${CAFFE_CUDA_OBJS})
-endif()
-
 # file structure
 source_group(src FILES ${CAFFE_SRC})
-source_group(src\\cudnn FILES ${CAFFE_SRC_LAYERS_CUDNN})
 
 add_definitions(-DCAFFE_EXPORTS)
 add_definitions(-DUSE_OPENCV)
